@@ -1,3 +1,40 @@
+# Signed and Unsigned Numbers
+
+**least significant bit: rightmost bit**
+
+**most significant bit**: leftmost bit
+
+**overflow**: the result can not be represented by hardware bits
+
+**1st Representation (sign and magnitude**
+
+add a separate sign represented in a single bit.
+
+**2st Representation( two's complement**
+
+leading 0s means positive, leading 1s means negative
+
+![](3.png)
+
+第一位代表 -$2^{-(n-1)}$。之后第依次代表$2^{n-2}$, $2^{n-3}$...
+
+The two's complement representes from $-2^{n-1}$to $2^{n-1}-1$
+
+1. Hardware only need to test the most significant bit to see if a number is positive or not
+2. the left bits of a number using two's complement is 0s or 1s
+3. The overflow occurs when adding two negative numbers resulting positive numbers, or adding two positive numbers resulting negative numbers
+
+**Signed load: copy number with shorter rigister to larger rigister. copy the sign repeated to fill the rest of the register.( sign extension**
+
+**Two Quick Way**
+
+1. Negate a two's complement binary number, simply invert every 0 to 1 and every 1 to 0, then add one to the result.
+2. **Sign extension**: replicates the most significant bit from the smaller quantity
+
+**The name of Two's complement**: unsigned sum of n-bit number and its negative is $2^{n}$
+
+
+
 # Memory Management
 
 ```c
@@ -47,8 +84,6 @@ List list_add(List list, char *string)
 }
 ```
 
-
-
 ## Memory locations
 
 - **Static storage**: global variable storage, basically permanent, entire program run
@@ -58,8 +93,6 @@ List list_add(List list, char *string)
 ![](1.png)
 
 ![](2.png)
-
-
 
 ## Memory Management
 
