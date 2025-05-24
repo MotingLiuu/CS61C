@@ -1,3 +1,244 @@
+# Compiling and Running C
+
+**Executable file** is `a.out`
+
+```bash
+$ gcc -o program program.c
+$ ./program
+```
+
+`-o` used to specify the name of executable file that `gcc` creates.
+
+
+
+**Debuging tools**: `cgdb` and `valgrind`
+
+```c
+#include <stdio.h>
+
+int main(int argc, char *argv[]) {
+    int i;
+    int count = 0;
+    int *p = &count;
+
+    for (i = 0; i < 10; i++) {
+        (*p)++; // Do you understand this line of code and all the other permutations of the operators? ;)
+    }
+
+    printf("Thanks for waddling through this program. Have a nice day.");
+    return 0;
+}
+```
+
+gdb will get into the printf to execute line by line when using `step`, but execute all of the printf when using `next`
+
+1. Set the arguments that will be passed to the program when it’s run
+
+```bash
+set args input.txt output.txt
+```
+
+2. Create a breakpoint
+
+```bash
+break mian
+break hello.c:10
+```
+
+3. Continue the program after stopping at a breakpoint
+
+```bash
+continue
+c
+```
+
+4. Print the value of a variable( print <expression>
+
+```bash
+print x
+print 1 + 2
+```
+
+5. Configure gdb displays the value of a variable after evey step
+
+```bash
+display x
+```
+
+6. Show a list of all variables and their values in the current funciton
+
+```bash
+info locals
+```
+
+7. Quit out of gdb
+
+```bash
+quit
+```
+
+`Ctrl+D`
+
+
+
+**Use redirection in C for file input**
+
+```bash
+./a.out < fileName.txt
+```
+
+```c
+#include <stdio.h>
+
+#define BUFFERSIZE 100
+
+int main (int argc, char *argv[])
+{
+    char buffer[BUFFERSIZE];
+    fgets(buffer, BUFFERSIZE , stdin);
+    printf("Read: %s", buffer);
+    return 0;
+}
+```
+
+
+
+## Valgrind
+
+```c
+#include <stdio.h>
+int main() {
+    int a[5] = {1, 2, 3, 4, 5}; // int array
+    unsigned total = 0; 
+    for (int j = 0; j < sizeof(a); j++) { // a is a real array, not a pointer. so sizeof(a) is 20.
+        total += a[j];
+    }
+    printf("size of a is %d\n", sizeof(a));
+    printf("sum of array is %d\n", total);
+}
+```
+
+The output of `Valgrind ./no_segfault.c` would be
+
+```bas
+(base) bigorange@BigOrangesLapTop:~/projects/CS61C/lab01$ valgrind no_segfault_ex 
+==58451== Memcheck, a memory error detector
+==58451== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==58451== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==58451== Command: no_segfault_ex
+==58451== 
+size of a is 20
+==58451== Conditional jump or move depends on uninitialised value(s)
+==58451==    at 0x48D9AD6: __vfprintf_internal (vfprintf-internal.c:1516)
+==58451==    by 0x48C379E: printf (printf.c:33)
+==58451==    by 0x109200: main (no_segfault_ex.c:9)
+==58451== 
+==58451== Use of uninitialised value of size 8
+==58451==    at 0x48BD2EB: _itoa_word (_itoa.c:177)
+==58451==    by 0x48D8ABD: __vfprintf_internal (vfprintf-internal.c:1516)
+==58451==    by 0x48C379E: printf (printf.c:33)
+==58451==    by 0x109200: main (no_segfault_ex.c:9)
+==58451== 
+==58451== Conditional jump or move depends on uninitialised value(s)
+==58451==    at 0x48BD2FC: _itoa_word (_itoa.c:177)
+==58451==    by 0x48D8ABD: __vfprintf_internal (vfprintf-internal.c:1516)
+==58451==    by 0x48C379E: printf (printf.c:33)
+==58451==    by 0x109200: main (no_segfault_ex.c:9)
+==58451== 
+==58451== Conditional jump or move depends on uninitialised value(s)
+==58451==    at 0x48D95C3: __vfprintf_internal (vfprintf-internal.c:1516)
+==58451==    by 0x48C379E: printf (printf.c:33)
+==58451==    by 0x109200: main (no_segfault_ex.c:9)
+==58451== 
+==58451== Conditional jump or move depends on uninitialised value(s)
+==58451==    at 0x48D8C05: __vfprintf_internal (vfprintf-internal.c:1516)
+==58451==    by 0x48C379E: printf (printf.c:33)
+==58451==    by 0x109200: main (no_segfault_ex.c:9)
+==58451== 
+sum of array is 32114780
+==58451== 
+==58451== HEAP SUMMARY:
+==58451==     in use at exit: 0 bytes in 0 blocks
+==58451==   total heap usage: 1 allocs, 1 frees, 1,024 bytes allocated
+==58451== 
+==58451== All heap blocks were freed -- no leaks are possible
+==58451== 
+==58451== Use --track-origins=yes to see where uninitialised values come from
+==58451== For lists of detected and suppressed errors, rerun with: -s
+==58451== ERROR SUMMARY: 19 errors from 5 contexts (suppressed: 0 from 0)
+```
+
+When checking for the propagation of "uninitialized values," Valgrind typically only reports the **first point where the dirty data causes a problem**—such as in a conditional check, output operation, or calculation—**if the** **`--track-origins=yes`** **--track-origins=yes** **--track-origins=yes** **--track-origins=yes flag is not used**.
+
+
+
+
+
+# Arrays and Pointers
+
+In the most formulation, the array name in C would be transformed to a pointer pointing to the first element in the array.
+
+two exceptions
+
+1. `sizeof(a)` would return the bytes of the whole array
+2. `&a` would return the whole address of the array. Type is `int (*)[N]` not `int*`
+
+```c
+void foo() {
+    int a[5] = {1,2,3,4,5};
+    // 这里 a 是一个真·数组，内存上真的有5个连续int
+}
+```
+
+```c
+void bar(int a[]) {
+    // 或 void bar(int *a)
+    // 这里 a 实际上就是一个 int* 指针
+    // sizeof(a) would get the size of pointer
+}
+```
+
+**Any name parameter is a pointer**: For efficiency and flexibility, when passing arrays as function parameters in C, only a pointer is actually passed, rather than copying the entire array.
+
+
+
+The unary operator `*` is the **indirection** or **dereferencing** operator; When applied to a pointer, it accesses the object the pointer points to.
+
+
+
+C passes arguments to functions by value, no direct way for the called function to alter a variable in the calling function.
+
+```c
+void swap(int *px, int *py) {
+  int temp;
+  temp = *px;
+  *px = *py;
+  *py = temp;
+}
+```
+
+
+
+**Difference between an array name and a pointer**:
+
+Pointer is a variable `pa = a` and `pa++` are legal. But an array name is not a variable `a=pa` and `a++`  are illegal.
+
+# Common Faults
+
+**Segmentation fault**: occurs when a proogram crashes from trying to access memory that is not avaiable to it.
+
+A segmentation fault only occurs if the memory you access happens to fall within a region that the operating system prohibits access to, such as an illegal address (unmapped virtual memory).
+
+However, for small arrays, the memory beyond them often still lies within the stack space—containing other variables, return addresses, etc.—so the program may not crash immediately.
+
+
+
+`++p` and `p++`
+
+`buf[++p]` would get `buf[p+1]` and then `p = p + 1`
+
+`buf[p++]`would get  `buf[p]`  and then  `p = p + 1`
+
 # Signed and Unsigned Numbers
 
 **least significant bit: rightmost bit**
@@ -138,4 +379,3 @@ At this point, `*stackAddr` may still read the old value of `y`.
 However, before executing the second `printf`, the stack space might be overwritten or reused by subsequent function calls (like `printf`) or other operations.
 
 **Never return the address of a local (stack) variable.**
-
